@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { QRCodeSVG } from 'qrcode.react';
 import { authService } from '../services/authService';
+import { useReloj } from '../hooks/useReloj';
+import Navbar from '../components/Navbar';
 
 function DashboardEstudiante() {
-  const [usuario, setUsuario] = useState({ 
-    name: "Cargando...", 
-    matricula: "...", 
-    carrera: "Ingeniería" 
+  const [usuario, setUsuario] = useState({
+    name: "Cargando...",
+    matricula: "...",
+    carrera: "Ingeniería"
   });
-  const [tiempo, setTiempo] = useState({ horas: '00', minutos: '00', segundos: '00' });
-  const [mensajeReloj, setMensajeReloj] = useState("Cargando...");
-  const [servicioActivo, setServicioActivo] = useState(false);
+
+  const { tiempo, mensajeReloj, servicioActivo } = useReloj();
 
   useEffect(() => {
-    // 1. Cargar datos usuario del LocalStorage (Simulación de sesión persistente)
     const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
     if (usuarioGuardado) {
       setUsuario({
@@ -22,114 +23,66 @@ function DashboardEstudiante() {
         carrera: "Desarrollo de Software"
       });
     }
-
-    // 2. Lógica del Reloj Inteligente
-    const intervalo = setInterval(() => {
-      const ahora = new Date();
-      
-      // Definir Horarios: 11:00 AM a 2:00 PM (14:00)
-      const inicioServicio = new Date(); 
-      inicioServicio.setHours(11, 0, 0, 0);
-      
-      const finServicio = new Date(); 
-      finServicio.setHours(14, 0, 0, 0);
-
-      let diferencia = 0;
-
-      if (ahora < inicioServicio) {
-        // Antes de las 11:00 AM
-        diferencia = inicioServicio - ahora;
-        setMensajeReloj("El servicio inicia en:");
-        setServicioActivo(false);
-      } 
-      else if (ahora >= inicioServicio && ahora < finServicio) {
-        // Entre 11:00 AM y 2:00 PM
-        diferencia = finServicio - ahora;
-        setMensajeReloj("Tiempo restante para comer:");
-        setServicioActivo(true);
-      } 
-      else {
-        // Después de las 2:00 PM
-        diferencia = 0;
-        setMensajeReloj("Servicio finalizado por hoy");
-        setServicioActivo(false);
-      }
-
-      // Formatear milisegundos a HH:MM:SS
-      if (diferencia > 0) {
-        const h = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((diferencia / (1000 * 60)) % 60);
-        const s = Math.floor((diferencia / 1000) % 60);
-
-        setTiempo({
-          horas: h.toString().padStart(2, '0'),
-          minutos: m.toString().padStart(2, '0'),
-          segundos: s.toString().padStart(2, '0')
-        });
-      } else {
-        setTiempo({ horas: '00', minutos: '00', segundos: '00' });
-      }
-
-    }, 1000);
-
-    return () => clearInterval(intervalo);
   }, []);
 
   return (
-    <div className="min-vh-100 bg-white">
-      {/* Navbar Compacto y Responsivo */}
-      <nav className="navbar navbar-dark bg-secondary py-2 px-3 shadow-sm">
-        <div className="d-flex w-100 justify-content-between align-items-center">
-          <span className="navbar-brand fw-bold h1 mb-0 fs-5">Beca Digital</span>
-          <div className="d-flex gap-2 align-items-center">
-            {/* Ocultamos el nombre en pantallas muy pequeñas (d-none d-sm-block) */}
-            <span className="text-white-50 d-none d-sm-block small">Hola, {usuario.name.split(" ")[0]}</span>
-            <button onClick={authService.logout} className="btn btn-outline-light btn-sm px-3">Salir</button>
-          </div>
-        </div>
-      </nav>
+    <div className="min-vh-100 bg-light">
+      <Navbar title="Beca Digital" bgClass="bg-success">
+        <span className="text-white d-none d-sm-block small fw-medium opacity-75">Hola, {usuario.name.split(" ")[0]}</span>
+        <button onClick={authService.logout} className="btn btn-light btn-sm px-3 fw-bold text-success rounded-pill shadow-sm">Salir</button>
+      </Navbar>
 
-      <div className="container py-4">
+      <div className="container py-5">
         <div className="row justify-content-center">
-          <div className="col-lg-10 col-xl-8">
-            <h2 className="fw-bold mb-1 text-center text-md-start">Tu Boleto</h2>
-            <p className="text-muted mb-4 text-center text-md-start small">Muestra este código en caja.</p>
+          <div className="col-lg-10 col-xl-9">
 
-            <div className="row g-3">
-              
+            <div className="mb-4 text-center text-md-start">
+              <h2 className="fw-bold text-dark mb-1" style={{ letterSpacing: '-0.5px' }}>Tu Boleto Digital</h2>
+              <p className="text-muted small">Presenta este código en la caja de la cafetería.</p>
+            </div>
+
+            <div className="row g-4">
+
               {/* TARJETA QR */}
-              {/* En móvil ocupa todo el ancho (col-12), en Tablet/PC ocupa 7 columnas (col-md-7) */}
               <div className="col-12 col-md-7">
-                <div className={`p-4 rounded-4 shadow-sm d-flex flex-column flex-sm-row align-items-center gap-4 border ${servicioActivo ? 'border-success bg-success bg-opacity-10' : 'border-secondary bg-light'}`}>
-                  
+                <div className={`p-4 p-lg-5 rounded-5 shadow-sm d-flex flex-column flex-sm-row align-items-center gap-4 border-0 h-100 transition-all ${servicioActivo ? 'bg-white' : 'bg-white opacity-75'}`}>
+
                   {/* Imagen QR */}
-                  <div className="bg-white rounded-4 p-2 shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '180px', height: '180px' }}>
-                     {servicioActivo ? (
-                        <img 
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${usuario.matricula}`} 
-                          alt="QR" 
-                          className="img-fluid"
-                        />
-                     ) : (
-                        <div className="text-center text-muted">
-                          <h3>🔒</h3>
-                          <small>Inactivo</small>
-                        </div>
-                     )}
+                  <div className="qr-box flex-shrink-0 shadow-sm border border-light p-3 bg-white rounded-4">
+                    {servicioActivo ? (
+                      <QRCodeSVG
+                        value={authService.getQRToken(usuario.matricula)}
+                        size={160}
+                        level={"H"} // Alta corrección de errores
+                        includeMargin={false}
+                      />
+                    ) : (
+                      <div className="text-center text-muted py-4">
+                        <div className="fs-1 mb-2">🔒</div>
+                        <small className="fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Fuera de Horario</small>
+                      </div>
+                    )}
                   </div>
 
                   {/* Datos del Alumno */}
                   <div className="text-dark w-100 text-center text-sm-start">
-                    <h5 className="fw-bold mb-2 text-success">Beneficiario</h5>
-                    <p className="mb-0 small text-muted">Nombre</p>
-                    <p className="fw-bold mb-2 text-truncate">{usuario.name}</p>
-                    
-                    <p className="mb-0 small text-muted">Matrícula</p>
-                    <p className="fw-bold font-monospace mb-3">{usuario.matricula}</p>
-                    
-                    {servicioActivo ? 
-                       <span className="badge bg-success px-3 py-2 w-100 w-sm-auto">✅ ACTIVO</span> : 
-                       <span className="badge bg-secondary px-3 py-2 w-100 w-sm-auto">🕒 CERRADO</span>
+                    <div className="mb-3">
+                      <p className="mb-1 small text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Beneficiario</p>
+                      <h4 className="fw-bold mb-0 text-dark text-truncate">{usuario.name}</h4>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="mb-1 small text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Matrícula</p>
+                      <p className="fs-5 font-monospace mb-0 text-dark">{usuario.matricula}</p>
+                    </div>
+
+                    {servicioActivo ?
+                      <span className="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-bold border border-success border-opacity-25">
+                        ● DISPONIBLE
+                      </span> :
+                      <span className="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill fw-bold border border-secondary border-opacity-25">
+                        ● CERRADO
+                      </span>
                     }
                   </div>
                 </div>
@@ -137,19 +90,23 @@ function DashboardEstudiante() {
 
               {/* TARJETA RELOJ */}
               <div className="col-12 col-md-5">
-                <div className={`p-4 rounded-4 h-100 shadow-sm text-center border d-flex flex-column justify-content-center ${servicioActivo ? 'bg-success bg-opacity-10 border-success' : 'bg-light border-secondary'}`}>
-                  <h6 className="fw-bold text-dark mb-3 text-uppercase small">{mensajeReloj}</h6>
-                  
-                  <div className="d-flex gap-1 justify-content-center mb-3 align-items-center">
-                     <div className="bg-white rounded p-2 display-6 fw-bold shadow-sm text-dark" style={{minWidth:'60px'}}>{tiempo.horas}</div>
-                     <span className="h4 fw-bold text-muted mb-0">:</span>
-                     <div className="bg-white rounded p-2 display-6 fw-bold shadow-sm text-dark" style={{minWidth:'60px'}}>{tiempo.minutos}</div>
-                     <span className="h4 fw-bold text-muted mb-0">:</span>
-                     <div className="bg-white rounded p-2 display-6 fw-bold shadow-sm text-dark" style={{minWidth:'60px'}}>{tiempo.segundos}</div>
+                <div className={`p-4 rounded-5 h-100 shadow-sm text-center border-0 d-flex flex-column justify-content-center ${servicioActivo ? 'bg-success text-white' : 'bg-white text-dark'}`}
+                  style={servicioActivo ? { background: 'linear-gradient(145deg, #166534, #15803d)' } : {}}>
+
+                  <h6 className={`fw-bold mb-4 text-uppercase small ${servicioActivo ? 'text-white-50' : 'text-muted'}`} style={{ letterSpacing: '1px' }}>
+                    {mensajeReloj}
+                  </h6>
+
+                  <div className="d-flex gap-2 justify-content-center mb-4 align-items-center">
+                    <div className={`rounded-3 p-2 display-6 fw-bold shadow-sm ${servicioActivo ? 'bg-white text-success' : 'bg-light text-dark'}`} style={{ minWidth: '60px' }}>{tiempo.horas}</div>
+                    <span className={`h4 fw-bold mb-0 ${servicioActivo ? 'text-white-50' : 'text-muted'}`}>:</span>
+                    <div className={`rounded-3 p-2 display-6 fw-bold shadow-sm ${servicioActivo ? 'bg-white text-success' : 'bg-light text-dark'}`} style={{ minWidth: '60px' }}>{tiempo.minutos}</div>
+                    <span className={`h4 fw-bold mb-0 ${servicioActivo ? 'text-white-50' : 'text-muted'}`}>:</span>
+                    <div className={`rounded-3 p-2 display-6 fw-bold shadow-sm ${servicioActivo ? 'bg-white text-success' : 'bg-light text-dark'}`} style={{ minWidth: '60px' }}>{tiempo.segundos}</div>
                   </div>
-                  
-                  <p className="small text-muted mb-0">
-                    Horario: 11:00 AM - 2:00 PM
+
+                  <p className={`small mb-0 ${servicioActivo ? 'text-white-50' : 'text-muted'}`}>
+                    Horario de Servicio: <br /> <strong>11:00 AM - 2:00 PM</strong>
                   </p>
                 </div>
               </div>

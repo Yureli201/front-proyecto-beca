@@ -1,70 +1,158 @@
-impor
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --primary-color: #166534;
+  /* Verde oscuro */
+  --secondary-color: #6c757d;
+  --font-main: 'Poppins', sans-serif;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  /* Fondo verde muy suave */
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* --- ANIMACIONES --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+
+  75% {
+    transform: translateX(-5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* --- UTILIDADES DE DISEÑO --- */
+.scanner-container {
+  width: 100%;
+  max-width: 350px;
+  aspect-ratio: 1/1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 2px solid #198754;
+  /* border-success */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.scanner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border: 4px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.card-status {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* --- SIDEBAR (ADMIN) --- */
+.sidebar-container {
+  width: 250px;
+  background-color: var(--primary-color);
+  position: fixed;
+  height: 100vh;
+  z-index: 1040;
+  left: 0;
+  top: 0;
+  transform: translateX(-100%);
+  /* Oculto por defecto en móvil */
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-open {
+  transform: translateX(0) !important;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  start: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1030;
+}
+
+/* En pantallas medianas y grandes, el sidebar siempre se ve y no es fixed */
+@media (min-width: 768px) {
+  .sidebar-container {
+    transform: none !important;
+    position: relative !important;
+    height: auto !important;
   }
-  a:hover {
-    color: #747bff;
+
+  .sidebar-overlay {
+    display: none;
   }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+/* --- QR ESTUDIANTE --- */
+.qr-box {
+  width: 180px;
+  height: 180px;
+  background-color: white;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+}
+
+.reloj-digit {
+  background-color: white;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  font-size: 2.5rem;
+  /* display-6 aprox */
+  font-weight: bold;
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+  color: #212529;
+  min-width: 60px;
+  text-align: center;
 }
