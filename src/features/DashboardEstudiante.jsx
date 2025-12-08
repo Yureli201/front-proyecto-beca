@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { QRCodeSVG } from 'qrcode.react';
 import { authService } from '../services/authService';
@@ -12,18 +12,52 @@ function DashboardEstudiante() {
     carrera: "Ingeniería"
   });
 
+  // Estado para el QR y el contador
+  const [qrToken, setQrToken] = useState("");
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutos en segundos
+
   const { tiempo, mensajeReloj, servicioActivo } = useReloj();
 
+  // 1. Cargar usuario
   useEffect(() => {
     const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
     if (usuarioGuardado) {
-      setUsuario({
+      const datosUser = {
         name: usuarioGuardado.name || "Estudiante",
         matricula: usuarioGuardado.matricula || usuarioGuardado.student_info?.matricula || "S/N",
         carrera: "Desarrollo de Software"
-      });
+      };
+      setUsuario(datosUser);
+      // Generar primer QR
+      setQrToken(authService.getQRToken(datosUser.matricula));
     }
   }, []);
+
+  // 2. Lógica del temporizador de 5 minutos para el QR
+  useEffect(() => {
+    // Si no hay matrícula cargada aún, no hacemos nada
+    if (usuario.matricula === "...") return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          // Se acabó el tiempo: Generar nuevo token y reiniciar cuenta
+          setQrToken(authService.getQRToken(usuario.matricula));
+          return 300; // Reiniciar a 5 min
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [usuario.matricula]);
+
+  // Formato mm:ss
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   return (
     <div className="min-vh-100 bg-light">
@@ -48,18 +82,31 @@ function DashboardEstudiante() {
                 <div className={`p-4 p-lg-5 rounded-5 shadow-sm d-flex flex-column flex-sm-row align-items-center gap-4 border-0 h-100 transition-all ${servicioActivo ? 'bg-white' : 'bg-white opacity-75'}`}>
 
                   {/* Imagen QR */}
-                  <div className="qr-box flex-shrink-0 shadow-sm border border-light p-3 bg-white rounded-4">
-                    {servicioActivo ? (
-                      <QRCodeSVG
-                        value={authService.getQRToken(usuario.matricula)}
-                        size={160}
-                        level={"H"} // Alta corrección de errores
-                        includeMargin={false}
-                      />
-                    ) : (
-                      <div className="text-center text-muted py-4">
-                        <div className="fs-1 mb-2">🔒</div>
-                        <small className="fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Fuera de Horario</small>
+                  <div className="d-flex flex-column align-items-center">
+                    <div className="qr-box flex-shrink-0 shadow-sm border border-light p-3 bg-white rounded-4 position-relative">
+                      {servicioActivo ? (
+                        <>
+                          <QRCodeSVG
+                            value={qrToken}
+                            size={160}
+                            level={"H"} // Alta corrección de errores
+                            includeMargin={false}
+                          />
+                          {/* Overlay sutil al regenerar podría ir aquí */}
+                        </>
+                      ) : (
+                        <div className="text-center text-muted py-4" style={{ width: '160px', height: '160px' }}>
+                          <div className="fs-1 mb-2 mt-4">🔒</div>
+                          <small className="fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Fuera de Horario</small>
+                        </div>
+                      )}
+                    </div>
+
+                    {servicioActivo && (
+                      <div className="mt-3 text-center">
+                        <span className="badge bg-light text-secondary border rounded-pill px-3 py-1 small font-monospace">
+                          ↻ Actualiza en: {formatTime(timeLeft)}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -68,7 +115,7 @@ function DashboardEstudiante() {
                   <div className="text-dark w-100 text-center text-sm-start">
                     <div className="mb-3">
                       <p className="mb-1 small text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Beneficiario</p>
-                      <h4 className="fw-bold mb-0 text-dark text-truncate">{usuario.name}</h4>
+                      <h4 className="fw-bold mb-0 text-dark lh-sm">{usuario.name}</h4>
                     </div>
 
                     <div className="mb-4">

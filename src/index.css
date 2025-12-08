@@ -5,6 +5,35 @@
   /* Verde oscuro */
   --secondary-color: #6c757d;
   --font-main: 'Poppins', sans-serif;
+
+  /* Variables de Tema (Light por defecto) */
+  --bg-body: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  --bg-card: #ffffff;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --table-border: #e9ecef;
+  --input-bg: #f8f9fa;
+  --bg-sidebar: #ffffff;
+}
+
+/* --- TEMA OSCURO (Inversión Estricta) --- */
+.dark-mode {
+  /* Fondo general: Negro o casi negro */
+  --bg-body: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+
+  /* Tarjetas: Negro puro con borde sutil o gris muy oscuro */
+  --bg-card: #000000;
+
+  /* Texto: Blanco puro */
+  --text-main: #ffffff;
+  --text-muted: #b0b0b0;
+
+  /* Tablas y bordes: Blancos translúcidos */
+  --table-border: #333333;
+  --input-bg: #1a1a1a;
+
+  /* Sidebar: Negro */
+  --bg-sidebar: #000000;
 }
 
 body {
@@ -12,9 +41,91 @@ body {
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  /* Fondo verde muy suave */
+  background: var(--bg-body) !important;
+  color: var(--text-main) !important;
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Clases de utilidad para el tema */
+.bg-light {
+  background-color: transparent !important;
+}
+
+/* Tarjetas y Contenedores */
+.card,
+.bg-white {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  /* En modo oscuro, agregamos un borde blanco sutil para que se distingan las tarjetas negras sobre el fondo negro */
+  border: 1px solid transparent;
+}
+
+.dark-mode .card,
+.dark-mode .bg-white {
+  border-color: #333333;
+}
+
+/* Textos Adaptativos (Evita conflictos con Bootstrap) */
+.text-adaptive {
+  color: var(--text-main) !important;
+}
+
+.text-dark {
+  color: var(--text-main) !important;
+  /* Intento de override, pero usar text-adaptive por seguridad */
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Tablas */
+.table {
+  color: var(--text-main) !important;
+  --bs-table-color: var(--text-main);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--table-border);
+}
+
+.table-hover tbody tr:hover {
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Inputs y Selects */
+.form-control,
+.form-select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  border-color: var(--table-border) !important;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Fix para el icono del select en dark mode */
+.dark-mode .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23f9fafb' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+/* Sidebar en dark mode */
+.sidebar-container {
+  background-color: var(--bg-sidebar) !important;
+}
+
+/* Botones Light en Dark Mode */
+.dark-mode .btn-light {
+  background-color: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+.dark-mode .btn-light:hover {
+  background-color: #4b5563;
 }
 
 /* --- ANIMACIONES --- */
@@ -69,7 +180,6 @@ body {
   overflow: hidden;
   border-radius: 1rem;
   border: 2px solid #198754;
-  /* border-success */
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
@@ -85,22 +195,15 @@ body {
   z-index: 10;
 }
 
-.card-status {
-  max-width: 400px;
-  width: 100%;
-}
-
-/* --- SIDEBAR (ADMIN) --- */
+/* Sidebar Estilos Base */
 .sidebar-container {
   width: 250px;
-  background-color: var(--primary-color);
   position: fixed;
   height: 100vh;
   z-index: 1040;
   left: 0;
   top: 0;
   transform: translateX(-100%);
-  /* Oculto por defecto en móvil */
   transition: transform 0.3s ease-in-out;
 }
 
@@ -118,7 +221,6 @@ body {
   z-index: 1030;
 }
 
-/* En pantallas medianas y grandes, el sidebar siempre se ve y no es fixed */
 @media (min-width: 768px) {
   .sidebar-container {
     transform: none !important;
@@ -131,7 +233,8 @@ body {
   }
 }
 
-/* --- QR ESTUDIANTE --- */
+
+
 .qr-box {
   width: 180px;
   height: 180px;
@@ -142,17 +245,4 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
-}
-
-.reloj-digit {
-  background-color: white;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
-  font-size: 2.5rem;
-  /* display-6 aprox */
-  font-weight: bold;
-  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
-  color: #212529;
-  min-width: 60px;
-  text-align: center;
 }

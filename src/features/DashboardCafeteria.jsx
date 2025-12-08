@@ -11,8 +11,11 @@ function DashboardCafeteria() {
   const [resultado, setResultado] = useState(null);
   const [datosTicket, setDatosTicket] = useState(null);
   const [historial, setHistorial] = useState([]);
+  const [user, setUser] = useState({ name: '' });
 
   useEffect(() => {
+    const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
+    if (usuarioGuardado) setUser(usuarioGuardado);
     cargarHistorial();
   }, []);
 
@@ -73,7 +76,7 @@ function DashboardCafeteria() {
   return (
     <div className="min-vh-100 bg-light">
 
-      <Navbar title="☕ Cafetería" bgClass="bg-dark">
+      <Navbar title={`☕ ${user.name ? user.name.split(' ')[0] : 'Cafetería'}`} bgClass="bg-dark">
         <div className="d-flex bg-white bg-opacity-10 rounded-pill p-1">
           <button onClick={() => setVista('escanear')} className={`btn btn-sm rounded-pill px-3 transition-all ${vista === 'escanear' ? 'btn-light fw-bold shadow-sm' : 'text-white-50'}`}>Escanear</button>
           <button onClick={() => setVista('historial')} className={`btn btn-sm rounded-pill px-3 transition-all ${vista === 'historial' ? 'btn-light fw-bold shadow-sm' : 'text-white-50'}`}>Historial</button>

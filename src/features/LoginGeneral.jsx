@@ -49,7 +49,8 @@ function LoginGeneral() {
   };
 
   return (
-    <div className="vh-100 d-flex align-items-center justify-content-center p-4">
+    <div className="vh-100 d-flex align-items-center justify-content-center p-4 position-relative">
+
       <div className="card border-0 shadow-lg rounded-5 overflow-hidden" style={{ maxWidth: '420px', width: '100%' }}>
         {/* Barra superior decorativa */}
         <div className="bg-success h-1 w-100" style={{ height: '8px' }}></div>

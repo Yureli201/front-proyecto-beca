@@ -1,38 +1,50 @@
 // src/services/authService.js
+import { dataService } from './dataService';
 
-// --- SERVICIO SIMULADO (MOCK) PARA PRESENTACIÓN ---
-// Este archivo finge que todo salió bien. No necesita Backend ni MongoDB.
+// --- SERVICIO DE AUTH CONECTADO A STORAGE ---
 
 export const authService = {
   
-  // 1. LOGIN MÁGICO
+  // 1. LOGIN REAL (Contra LocalStorage)
   login: async (email, password) => {
-    console.log(`Iniciando sesión simulada con: ${email}`);
+    // Simular un poco de espera para efecto de carga
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    let user;
+    // 1. Obtener todos los usuarios del "backend" (localStorage)
+    const users = await dataService.getUsers();
 
-    if (email.toLowerCase().includes("admin")) {
-      user = { name: "Director General", email, role: "admin" };
-    } else if (email.toLowerCase().includes("cafe")) {
-      user = { name: "Encargado Cafetería", email, role: "cafeteria" };
-    } else {
-      user = { 
-        name: "Juan Pérez (Estudiante)", 
-        email, 
-        role: "estudiante",
-        matricula: "2025001" 
-      };
+    // 2. Buscar coincidencias
+    const foundUser = users.find(u => 
+        u.email.toLowerCase() === email.toLowerCase() && 
+        u.password === password
+    );
+
+    if (!foundUser) {
+        throw new Error("Credenciales inválidas");
     }
 
-    localStorage.setItem('usuario', JSON.stringify(user));
-    return user;
+    // 3. Preparar objeto de sesión (sin password)
+    const sessionUser = {
+        id: foundUser.id,
+        name: foundUser.nombre, // Normalizamos a 'name' para que coincida con lo que espera el front
+        email: foundUser.email,
+        role: foundUser.rol.toLowerCase(), // Normalizamos rol
+        matricula: foundUser.matricula || null // Solo si tiene
+    };
+
+    // 4. Guardar sesión
+    localStorage.setItem('usuario', JSON.stringify(sessionUser));
+    return sessionUser;
   },
 
   // 2. GENERAR TOKEN SEGURO PARA QR
   getQRToken: (matricula) => {
+    // Solo generamos QR si hay matrícula
+    if (!matricula) return null;
+
     const fechaHoy = new Date().toLocaleDateString("es-MX").replace(/\//g, '-');
-    const firma = "SECURE-TOKEN"; 
+    const firma = "SECURE-TOKEN-" + Math.random().toString(36).substring(7); 
+    
     return JSON.stringify({
       app: "BECA-UT",
       matricula,
@@ -61,10 +73,12 @@ export const authService = {
         return { error: "QR Caducado (Fecha incorrecta)" };
       }
 
-      // D. Retornar datos válidos (La validación de uso se hace en dataService)
+      // D. Retornar datos válidos
+      // (Si quisieras validar "saldo" o "boleto usado" aquí consultarías dataService,
+      // pero por ahora devolvemos que es válido estructuralmente)
       return {
         matricula: data.matricula,
-        alumno: "Estudiante " + data.matricula,
+        alumno: "Estudiante " + data.matricula, // Aquí podríamos buscar el nombre real en dataService si quisiéramos
         estado: "VALIDO",
         token: codigoQR 
       };

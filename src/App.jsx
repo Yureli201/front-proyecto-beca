@@ -3,6 +3,10 @@ import React from 'react';
 import { AppRouter } from './routes/AppRoutes.jsx'; // Importa tu cerebro
 
 function App() {
+
+  // Efecto global para el tema oscuro
+
+
   return (
     <AppRouter /> // Carga el cerebro
   );
