@@ -14,7 +14,7 @@ export const useReloj = () => {
       inicioServicio.setHours(11, 0, 0, 0);
       
       const finServicio = new Date(); 
-      finServicio.setHours(18, 0, 0, 0);
+      finServicio.setHours(14, 0, 0, 0);
 
       let diferencia = 0;
 

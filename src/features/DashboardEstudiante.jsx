@@ -1,28 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { QRCodeSVG } from 'qrcode.react';
 import { authService } from '../services/authService';
+import { ticketsService } from '../services/ticketsService';
 import { useReloj } from '../hooks/useReloj';
 import Navbar from '../components/Navbar';
 
 function DashboardEstudiante() {
   const [usuario, setUsuario] = useState({
     name: "Cargando...",
-    matricula: "...",
-    carrera: "Ingeniería"
+    matricula: "..."
   });
+  const [loading, setLoading] = useState(true);
 
   const { tiempo, mensajeReloj, servicioActivo } = useReloj();
 
   useEffect(() => {
-    const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
-    if (usuarioGuardado) {
+    const cargarDatosEstudiante = async () => {
+      const matricula = localStorage.getItem("matricula");
+      const name = localStorage.getItem("name");
+
       setUsuario({
-        name: usuarioGuardado.name || "Estudiante",
-        matricula: usuarioGuardado.matricula || usuarioGuardado.student_info?.matricula || "S/N",
-        carrera: "Desarrollo de Software"
+        name,
+        matricula
       });
-    }
+    };
+
+    cargarDatosEstudiante();
   }, []);
 
   return (
@@ -51,7 +54,7 @@ function DashboardEstudiante() {
                   <div className="qr-box flex-shrink-0 shadow-sm border border-light p-3 bg-white rounded-4">
                     {servicioActivo ? (
                       <QRCodeSVG
-                        value={authService.getQRToken(usuario.matricula)}
+                        value={ticketsService.getQRToken()}
                         size={160}
                         level={"H"} // Alta corrección de errores
                         includeMargin={false}

@@ -1,10 +1,9 @@
-// src/App.jsx
 import React from 'react';
-import { AppRouter } from './routes/AppRoutes.jsx'; // Importa tu cerebro
+import { AppRouter } from './routes/AppRoutes.jsx';
 
 function App() {
   return (
-    <AppRouter /> // Carga el cerebro
+    <AppRouter />
   );
 }
 
