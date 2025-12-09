@@ -18,29 +18,29 @@ function LoginGeneral() {
     setCargando(true);
 
     try {
-      // 1. Llamamos al Back
-      const user = await authService.login(email, password);
+      const credentials = {
+        email: email,
+        password: password
+      };
 
-      console.log("Usuario recibido:", user); // Para que veas en consola qué llegó
+      const response = await authService.login(credentials);
 
-      // 2. Normalizamos el rol (todo a minúsculas para evitar errores)
-      // Tu BD tiene: "Administrador", "Cafeteria", "Estudiante"
-      const userRole = (user.role || user.rol || "").toLowerCase();
+      console.log("Respuesta del servidor:", response);
 
-      // 3. Redirección Robusta
-      if (userRole.includes("admin")) {
+      const userRole = (response.user.role).toLowerCase();
+
+      if (userRole.includes("administrador")) {
         navigate('/admin/dashboard');
       }
-      else if (userRole.includes("cafe")) {
+      else if (userRole.includes("cafeteria")) {
         navigate('/cafeteria/dashboard');
       }
-      else {
-        // Por defecto estudiante (cubre "estudiante", "alumno", etc.)
+      else if (userRole.includes("estudiante")) {
         navigate('/estudiante/dashboard');
       }
 
     } catch (err) {
-      console.error(err);
+      console.error("Error en login:", err);
       // Mensaje amigable para el usuario
       setError("No pudimos iniciar sesión. Verifica tu correo y contraseña.");
     } finally {

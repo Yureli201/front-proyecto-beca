@@ -1,82 +1,40 @@
-// src/services/authService.js
+import axios from "axios";
 
-// --- SERVICIO SIMULADO (MOCK) PARA PRESENTACIÓN ---
-// Este archivo finge que todo salió bien. No necesita Backend ni MongoDB.
+const BASE_URL = "https://api-proyecto-becas.onrender.com/auth";
+//const BASE_URL = "http://localhost:3000/auth";
+
 
 export const authService = {
-  
-  // 1. LOGIN MÁGICO
-  login: async (email, password) => {
-    console.log(`Iniciando sesión simulada con: ${email}`);
-    await new Promise(resolve => setTimeout(resolve, 500));
+  login(credentials) {
+    console.log("Iniciando sesión con:", credentials);
+    return axios
+      .post(BASE_URL + "/login", credentials)
 
-    let user;
-
-    if (email.toLowerCase().includes("admin")) {
-      user = { name: "Director General", email, role: "admin" };
-    } else if (email.toLowerCase().includes("cafe")) {
-      user = { name: "Encargado Cafetería", email, role: "cafeteria" };
-    } else {
-      user = { 
-        name: "Juan Pérez (Estudiante)", 
-        email, 
-        role: "estudiante",
-        matricula: "2025001" 
-      };
-    }
-
-    localStorage.setItem('usuario', JSON.stringify(user));
-    return user;
+      .then((response) => {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("rol", response.data.user.role);
+        localStorage.setItem("id", response.data.user._id);
+        localStorage.setItem("name", response.data.user.name);
+        localStorage.setItem("email", response.data.user.email);
+        if (response.data.user.role === "Estudiante") {
+          localStorage.setItem(
+            "matricula",
+            response.data.user.student_info.matricula
+          );
+        }
+        return response.data;
+      })
+      .catch((error) => {
+        throw error;
+      });
   },
 
-  // 2. GENERAR TOKEN SEGURO PARA QR
-  getQRToken: (matricula) => {
-    const fechaHoy = new Date().toLocaleDateString("es-MX").replace(/\//g, '-');
-    const firma = "SECURE-TOKEN"; 
-    return JSON.stringify({
-      app: "BECA-UT",
-      matricula,
-      fecha: fechaHoy,
-      firma
-    });
+  createUser(userData) {
+    return axios.post(BASE_URL + "/register", userData);
   },
 
-  // 3. VALIDACIÓN QR (Lógica de Negocio)
-  validarTicketQR: async (codigoQR) => {
-    console.log("Analizando QR:", codigoQR);
-    await new Promise(resolve => setTimeout(resolve, 800)); 
-    
-    try {
-      // A. Intentar leer el JSON
-      const data = JSON.parse(codigoQR);
-
-      // B. Validar Formato y Firma
-      if (!data || data.app !== "BECA-UT" || !data.matricula || !data.fecha) {
-        return null; // Formato inválido
-      }
-
-      // C. Validar Fecha (Solo vale por hoy)
-      const fechaHoy = new Date().toLocaleDateString("es-MX").replace(/\//g, '-');
-      if (data.fecha !== fechaHoy) {
-        return { error: "QR Caducado (Fecha incorrecta)" };
-      }
-
-      // D. Retornar datos válidos (La validación de uso se hace en dataService)
-      return {
-        matricula: data.matricula,
-        alumno: "Estudiante " + data.matricula,
-        estado: "VALIDO",
-        token: codigoQR 
-      };
-
-    } catch (e) {
-      return null; // No es un JSON válido
-    }
-  },
-
-  // 4. LOGOUT
   logout: () => {
-    localStorage.removeItem('usuario');
-    window.location.href = '/';
-  }
+    localStorage.clear();
+    window.location.href = "/";
+  },
 };

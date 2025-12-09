@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { authService } from '../services/authService';
-import { dataService } from '../services/dataService';
+import { ticketsService } from '../services/ticketsService';
 import Navbar from '../components/Navbar';
 
 function DashboardCafeteria() {
@@ -17,8 +16,8 @@ function DashboardCafeteria() {
   }, []);
 
   const cargarHistorial = async () => {
-    const data = await dataService.getHistorial();
-    setHistorial(data);
+    const response = await ticketsService.getTicketsToday();
+    setHistorial(response.data.tickets);
   };
 
   const handleScan = async (result) => {
@@ -27,7 +26,7 @@ function DashboardCafeteria() {
       if (codigo) {
         setProcesando(true);
         try {
-          const ticketValido = await authService.validarTicketQR(codigo);
+          const ticketValido = await ticketsService.validarTicketQR(codigo);
 
           if (ticketValido && !ticketValido.error) {
 
@@ -40,7 +39,6 @@ function DashboardCafeteria() {
             };
 
             // Intentar guardar (aquí puede saltar error de DUPLICADO)
-            await dataService.addHistorialEntry(nuevoRegistro);
             await cargarHistorial();
 
             setDatosTicket(ticketValido);
@@ -176,18 +174,18 @@ function DashboardCafeteria() {
                 <thead className="bg-light border-bottom-0">
                   <tr>
                     <th className="p-3 small text-uppercase text-muted fw-bold border-0">Hora</th>
-                    <th className="p-3 small text-uppercase text-muted fw-bold border-0">Alumno</th>
-                    <th className="p-3 small text-uppercase text-muted fw-bold border-0 text-end">Estado</th>
+                    <th className="p-3 small text-uppercase text-muted fw-bold border-0">Matricula</th>
+                    <th className="p-3 small text-uppercase text-muted fw-bold border-0 text-end">Codigo</th>
                   </tr>
                 </thead>
                 <tbody className="border-top-0">
                   {historial.map((item) => (
-                    <tr key={item.id}>
-                      <td className="p-3 fw-medium text-secondary font-monospace small border-bottom border-light">{item.hora}</td>
-                      <td className="p-3 fw-bold text-dark border-bottom border-light">{item.alumno}</td>
+                    <tr key={item._id}>
+                      <td className="p-3 fw-medium text-secondary font-monospace small border-bottom border-light">{item.redeemed_at}</td>
+                      <td className="p-3 fw-bold text-dark border-bottom border-light">{item.matricula}</td>
                       <td className="p-3 text-end border-bottom border-light">
                         <span className="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill small fw-bold border border-success border-opacity-10">
-                          {item.estado}
+                          {item.ticket_code}
                         </span>
                       </td>
                     </tr>
