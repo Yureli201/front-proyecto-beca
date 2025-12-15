@@ -26,9 +26,23 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: 'logo-beca.png',
+            src: 'pwa-icon.png',
             sizes: '512x512',
             type: 'image/png'
+          }
+        ],
+        screenshots:[
+          {
+            src: 'horizontal.png',
+            sizes: '2880x1214',
+            type: 'image/jpg',
+            form_factor: "narrow"
+          },
+          {
+            src: 'vertical.png',
+            sizes: '750x1094',
+            type: 'image/jpg',
+            form_factor: "wide"
           }
         ]
       }

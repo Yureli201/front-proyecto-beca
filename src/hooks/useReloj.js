@@ -9,12 +9,12 @@ export const useReloj = () => {
     const intervalo = setInterval(() => {
       const ahora = new Date();
       
-      // Definir Horarios: 11:00 AM a 2:00 PM (14:00)
+      // Definir Horarios: 11:00 AM a 6:00 PM (18:00)
       const inicioServicio = new Date(); 
       inicioServicio.setHours(11, 0, 0, 0);
       
       const finServicio = new Date(); 
-      finServicio.setHours(14, 0, 0, 0);
+      finServicio.setHours(18, 0, 0, 0);
 
       let diferencia = 0;
 
@@ -25,7 +25,7 @@ export const useReloj = () => {
         setServicioActivo(false);
       } 
       else if (ahora >= inicioServicio && ahora < finServicio) {
-        // Entre 11:00 AM y 2:00 PM
+        // Entre 11:00 AM y 6:00 PM
         diferencia = finServicio - ahora;
         setMensajeReloj("Tiempo restante para comer:");
         setServicioActivo(true);
